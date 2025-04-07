@@ -14,7 +14,7 @@ class Section:
         bullets (List[str]): Bullet-pointed items.
         subsections (List[Section]): Nested sections with the same structure.
     """
-    def __init__(self, title: str, *, body: str = '', bullets: Optional[List[str]] = None):
+    def __init__(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None):
         self.title = title
         self.body = body
         self.bullets = bullets or []
@@ -46,12 +46,14 @@ class Section:
 
     def to_dict(self):
         """Convert the section to a dictionary representation."""
-        return {
-            "title": self.title,
+        data = {
             "body": self.body,
             "bullets": self.bullets,
             "subsections": [s.to_dict() for s in self.subsections]
         }
+        if self.title is not None:
+            data["title"] = self.title
+        return data
 
     def render_markdown(self, level: int = 2) -> str:
         """
@@ -63,7 +65,9 @@ class Section:
         Returns:
             A string containing the markdown representation
         """
-        md = [f"{'#' * level} {self.title}\n"]
+        md = []
+        if self.title is not None:
+            md.append(f"{'#' * level} {self.title}\n")
         if self.body:
             md.append(f"{self.body}\n")
         for bullet in self.bullets:
@@ -71,7 +75,7 @@ class Section:
         if self.bullets:
             md.append("")
         for subsection in self.subsections:
-            md.append(subsection.render_markdown(level + 1))
+            md.append(subsection.render_markdown(level + (1 if self.title is not None else 0)))
         return "\n".join(md)
 
 
@@ -110,14 +114,14 @@ class PromptObjectModel:
         def build_section(d: dict) -> Section:
             if not isinstance(d, dict):
                 raise ValueError("Each section must be a dictionary.")
-            if 'title' not in d:
-                raise ValueError("Each section must have a 'title' field.")
+            if 'title' in d and not isinstance(d['title'], str):
+                raise ValueError("'title' must be a string if present.")
             if 'subsections' in d and not isinstance(d['subsections'], list):
                 raise ValueError("'subsections' must be a list if provided.")
             if 'bullets' in d and not isinstance(d['bullets'], list):
                 raise ValueError("'bullets' must be a list if provided.")
 
-            section = Section(d['title'], body=d.get('body', ''), bullets=d.get('bullets', []))
+            section = Section(title=d.get('title'), body=d.get('body', ''), bullets=d.get('bullets', []))
             for sub in d.get('subsections', []):
                 section.subsections.append(build_section(sub))
             return section
@@ -130,7 +134,7 @@ class PromptObjectModel:
     def __init__(self):
         self.sections: List[Section] = []
 
-    def add_section(self, title: str, *, body: str = '', bullets: Optional[List[str]] = None) -> Section:
+    def add_section(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None) -> Section:
         """
         Add a top-level section to the model.
         
