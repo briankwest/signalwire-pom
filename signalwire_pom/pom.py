@@ -78,6 +78,49 @@ class Section:
             md.append(subsection.render_markdown(level + (1 if self.title is not None else 0)))
         return "\n".join(md)
 
+    def render_xml(self, indent: int = 0) -> str:
+        """
+        Render this section and all its subsections as XML.
+        
+        Args:
+            indent: The indentation level to start with (default: 0)
+            
+        Returns:
+            A string containing the XML representation
+        """
+        indent_str = "  " * indent
+        xml = []
+        
+        # Start section tag
+        xml.append(f'{indent_str}<section>')
+        
+        # Title if present
+        if self.title is not None:
+            xml.append(f'{indent_str}  <title>{self.title}</title>')
+        
+        # Body content if present
+        if self.body:
+            xml.append(f'{indent_str}  <body>{self.body}</body>')
+        
+        # Bullets if present
+        if self.bullets:
+            xml.append(f'{indent_str}  <bullets>')
+            for bullet in self.bullets:
+                xml.append(f'{indent_str}    <bullet>{bullet}</bullet>')
+            xml.append(f'{indent_str}  </bullets>')
+        
+        # Subsections if present
+        if self.subsections:
+            xml.append(f'{indent_str}  <subsections>')
+            for subsection in self.subsections:
+                xml.append(subsection.render_xml(indent + 2))
+            xml.append(f'{indent_str}  </subsections>')
+        
+        # Closing tag
+        xml.append(f'{indent_str}</section>')
+        
+        return "\n".join(xml)
+
 
 class PromptObjectModel:
     """
@@ -188,4 +231,17 @@ class PromptObjectModel:
         Returns:
             A string containing the markdown representation
         """
-        return "\n".join([section.render_markdown() for section in self.sections]) 
+        return "\n".join([section.render_markdown() for section in self.sections])
+
+    def render_xml(self) -> str:
+        """
+        Render the entire model as XML.
+        
+        Returns:
+            A string containing the XML representation
+        """
+        xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<prompt>']
+        for section in self.sections:
+            xml.append(section.render_xml(indent=1))
+        xml.append('</prompt>')
+        return "\n".join(xml) 
