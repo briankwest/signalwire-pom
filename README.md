@@ -17,7 +17,7 @@ The Prompt Object Model (POM) is a structured data format and accompanying Pytho
 * An optional list of bullet points
 * Arbitrarily nested subsections
 
-POM supports both machine-readability (via JSON) and structured rendering (via Markdown), making it ideal for prompt templating, modular editing, and traceable documentation.
+POM supports multiple output formats including JSON (for machine-readability), Markdown (for human readability), and XML (for structured data exchange), making it ideal for prompt templating, modular editing, and traceable documentation.
 
 ## Benefits
 
@@ -43,7 +43,11 @@ Documents can be rendered as Markdown with proper heading levels (`##`, `###`, `
 
 The full prompt specification can be exported and rehydrated in JSON for use in automation, testing, and templating pipelines.
 
-### 5. Extensible
+### 5. XML Rendering
+
+POM documents can also be rendered to XML as an alternative to Markdown. This format is especially useful when your LLM is tuned to expect or parse structured XML data.
+
+### 6. Extensible
 
 The model is designed to be extensible and can easily incorporate metadata, tags, conditions, or versioning as needed.
 
@@ -81,6 +85,10 @@ print(markdown)
 # Generate JSON representation
 json_data = pom.to_json()
 print(json_data)
+
+# Generate XML representation
+xml_data = pom.render_xml()
+print(xml_data)
 
 # Create from JSON
 json_string = '''
@@ -122,6 +130,28 @@ print(loaded_pom.render_markdown())
 }
 ```
 
+## Example XML Representation
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<prompt>
+  <section>
+    <title>Objective</title>
+    <body>Define the LLM's purpose in this interaction.</body>
+    <bullets>
+      <bullet>Summarize clearly</bullet>
+      <bullet>Answer efficiently</bullet>
+    </bullets>
+    <subsections>
+      <section>
+        <title>Main Goal</title>
+        <body>Provide helpful and concise answers tailored to user intent.</body>
+      </section>
+    </subsections>
+  </section>
+</prompt>
+```
+
 ## Example Markdown Output
 
 ```markdown
@@ -141,7 +171,7 @@ Provide helpful and concise answers tailored to user intent.
 
 - Create structured hierarchical prompts
 - Add sections, subsections, body text, and bullet points
-- Export to markdown or JSON
+- Export to markdown, JSON, or XML
 - Import from JSON
 - Find sections by title
 
@@ -154,4 +184,4 @@ Provide helpful and concise answers tailored to user intent.
 
 ## License
 
-MIT 
+MIT
