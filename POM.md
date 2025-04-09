@@ -26,7 +26,7 @@ Structured prompts are essential when building reliable and maintainable LLM ins
 Each section is an object with the following fields:
 
 | Field | Type | Required | Description |
-| ----- | ----- | ----- | ----- |
+| :---- | :---- | :---- | :---- |
 | `title` | string | No (top), Yes (nested) | Heading text. Optional only at the root level. |
 | `body` | string | No | Paragraph or long-form instruction text. |
 | `bullets` | string\[\] | No | Bulleted list of short statements or rules. |
@@ -48,20 +48,46 @@ The entire POM document is a JSON array of top-level section objects.
   "$id": "https://example.com/pom.schema.json",
   "title": "Prompt Object Model",
   "type": "array",
-  "items": { "$ref": "#/$defs/section" },
+  "prefixItems": [
+    { "$ref": "#/$defs/topLevelSectionFirst" }
+  ],
+  "items": { "$ref": "#/$defs/topLevelSectionRest" },
   "$defs": {
-    "section": {
+    "sectionContent": {
       "type": "object",
       "properties": {
         "title": { "type": "string" },
         "body": { "type": "string" },
-        "bullets": { "type": "array", "items": { "type": "string" } },
-        "subsections": { "type": "array", "items": { "$ref": "#/$defs/section" } },
+        "bullets": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "subsections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nestedSection" }
+        },
         "numbered": { "type": "boolean" },
         "numberedBullets": { "type": "boolean" }
       },
-      "required": [],
       "additionalProperties": false
+    },
+    "topLevelSectionFirst": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" },
+        { "required": ["body"] }
+      ]
+    },
+    "topLevelSectionRest": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" },
+        { "required": ["title", "body"] }
+      ]
+    },
+    "nestedSection": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" },
+        { "required": ["title", "body"] }
+      ]
     }
   }
 }
@@ -102,22 +128,22 @@ Each section is rendered as Markdown with heading levels corresponding to its de
 ### **Rendered Markdown**
 
 ```
-## 1. Objective
+## 1 Objective
 
 Define the task.
 
 1. Be concise
 2. Avoid repetition
 
-### 1. Main Goal
+### 1 Main Goal
 
 Provide helpful and direct responses.
 
-### 2. Edge Cases
+### 2 Edge Cases
 
 Clarify how to handle rare or ambiguous requests.
 
-## 2. At Start
+## 2 At Start
 
 Greet the user and explain your role.
 ```
@@ -159,7 +185,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
 ```
 <prompt>
   <section>
-    <title>1. Objective</title>
+    <title>1 Objective</title>
     <body>Define the task.</body>
     <bullets>
       <bullet id="1">Be concise</bullet>
@@ -167,7 +193,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
     </bullets>
     <subsections>
       <section>
-        <title>1. Main Goal</title>
+        <title>1 Main Goal</title>
         <body>Provide helpful and direct responses.</body>
       </section>
       <section>
@@ -177,7 +203,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
     </subsections>
   </section>
   <section>
-    <title>2. At Start</title>
+    <title>2 At Start</title>
     <body>Greet the user and explain your role.</body>
   </section>
 </prompt>
@@ -191,7 +217,7 @@ While XML is highly structured and easy for LLMs to parse, it uses significantly
 
 ## **Example Usage in Python**
 
-```
+```py
 from POM import PromptObjectModel
 
 pom = PromptObjectModel()
@@ -204,7 +230,7 @@ print(pom.render_markdown())
 
 To load from JSON:
 
-```
+```py
 with open("prompt.json", "r") as f:
     pom = PromptObjectModel.from_json(f.read())
     print(pom.render_markdown())
