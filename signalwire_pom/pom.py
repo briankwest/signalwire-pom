@@ -13,12 +13,17 @@ class Section:
         body (str): A paragraph of text associated with the section.
         bullets (List[str]): Bullet-pointed items.
         subsections (List[Section]): Nested sections with the same structure.
+        numbered (bool): Whether this section should be numbered.
+        numberedBullets (bool): Whether bullets should be numbered instead of using bullet points.
     """
-    def __init__(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None):
+    def __init__(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None, 
+                 numbered: Optional[bool] = None, numberedBullets: bool = False):
         self.title = title
         self.body = body
         self.bullets = bullets or []
         self.subsections: List['Section'] = []
+        self.numbered = numbered
+        self.numberedBullets = numberedBullets
 
     def add_body(self, body: str):
         """Add or replace the body text for this section."""
@@ -28,7 +33,8 @@ class Section:
         """Add bullet points to this section."""
         self.bullets.extend(bullets)
 
-    def add_subsection(self, title: str, *, body: str = '', bullets: Optional[List[str]] = None) -> 'Section':
+    def add_subsection(self, title: str, *, body: str = '', bullets: Optional[List[str]] = None,
+                      numbered: bool = False, numberedBullets: bool = False) -> 'Section':
         """
         Add a subsection to this section.
         
@@ -36,11 +42,14 @@ class Section:
             title: The title of the subsection
             body: Optional body text for the subsection
             bullets: Optional list of bullet points
+            numbered: Whether this section should be numbered
+            numberedBullets: Whether bullets should be numbered
             
         Returns:
             The newly created Section object
         """
-        subsection = Section(title, body=body, bullets=bullets)
+        subsection = Section(title, body=body, bullets=bullets, 
+                            numbered=numbered, numberedBullets=numberedBullets)
         self.subsections.append(subsection)
         return subsection
 
@@ -53,37 +62,78 @@ class Section:
         }
         if self.title is not None:
             data["title"] = self.title
+        if self.numbered:
+            data["numbered"] = self.numbered
+        if self.numberedBullets:
+            data["numberedBullets"] = self.numberedBullets
         return data
 
-    def render_markdown(self, level: int = 2) -> str:
+    def render_markdown(self, level: int = 2, section_number: Optional[List[int]] = None) -> str:
         """
         Render this section and all its subsections as markdown.
         
         Args:
             level: The heading level to start with (default: 2, which corresponds to ##)
+            section_number: The current section number for numbered sections
             
         Returns:
             A string containing the markdown representation
         """
         md = []
+        
+        # Initialize section numbering if this is the top level call
+        if section_number is None:
+            section_number = []
+        
+        # Handle section title with optional numbering
         if self.title is not None:
-            md.append(f"{'#' * level} {self.title}\n")
+            prefix = ""
+            if section_number:  # If we have a section number, use it
+                prefix = f"{'.'.join(map(str, section_number))} "
+            md.append(f"{'#' * level} {prefix}{self.title}\n")
+        
+        # Add body text
         if self.body:
             md.append(f"{self.body}\n")
-        for bullet in self.bullets:
-            md.append(f"- {bullet}")
+        
+        # Add bullets with optional numbering
+        for i, bullet in enumerate(self.bullets, 1):
+            if self.numberedBullets:
+                md.append(f"{i}. {bullet}")
+            else:
+                md.append(f"- {bullet}")
+        
         if self.bullets:
             md.append("")
-        for subsection in self.subsections:
-            md.append(subsection.render_markdown(level + (1 if self.title is not None else 0)))
+        
+        # Check if any subsection has numbered=True
+        any_subsection_numbered = any(sub.numbered for sub in self.subsections)
+        
+        # Process subsections with proper numbering
+        for i, subsection in enumerate(self.subsections, 1):
+            # Only increment section number if parent has a title
+            if self.title is not None:
+                # If any subsection is numbered, number all siblings unless explicitly false
+                if any_subsection_numbered and subsection.numbered is not False:
+                    new_section_number = section_number + [i]
+                else:
+                    new_section_number = section_number
+                next_level = level + 1
+            else:
+                new_section_number = section_number
+                next_level = level
+                
+            md.append(subsection.render_markdown(next_level, new_section_number))
+        
         return "\n".join(md)
 
-    def render_xml(self, indent: int = 0) -> str:
+    def render_xml(self, indent: int = 0, section_number: Optional[List[int]] = None) -> str:
         """
         Render this section and all its subsections as XML.
         
         Args:
             indent: The indentation level to start with (default: 0)
+            section_number: The current section number for numbered sections
             
         Returns:
             A string containing the XML representation
@@ -91,12 +141,19 @@ class Section:
         indent_str = "  " * indent
         xml = []
         
+        # Initialize section numbering if this is the top level call
+        if section_number is None:
+            section_number = []
+        
         # Start section tag
         xml.append(f'{indent_str}<section>')
         
-        # Title if present
+        # Title if present, with optional numbering
         if self.title is not None:
-            xml.append(f'{indent_str}  <title>{self.title}</title>')
+            prefix = ""
+            if self.numbered and section_number:
+                prefix = f"{'.'.join(map(str, section_number))} "
+            xml.append(f'{indent_str}  <title>{prefix}{self.title}</title>')
         
         # Body content if present
         if self.body:
@@ -105,15 +162,27 @@ class Section:
         # Bullets if present
         if self.bullets:
             xml.append(f'{indent_str}  <bullets>')
-            for bullet in self.bullets:
-                xml.append(f'{indent_str}    <bullet>{bullet}</bullet>')
+            for i, bullet in enumerate(self.bullets, 1):
+                if self.numberedBullets:
+                    xml.append(f'{indent_str}    <bullet id="{i}">{bullet}</bullet>')
+                else:
+                    xml.append(f'{indent_str}    <bullet>{bullet}</bullet>')
             xml.append(f'{indent_str}  </bullets>')
         
         # Subsections if present
         if self.subsections:
             xml.append(f'{indent_str}  <subsections>')
-            for subsection in self.subsections:
-                xml.append(subsection.render_xml(indent + 2))
+            # Check if any subsection has numbered=True
+            any_subsection_numbered = any(sub.numbered for sub in self.subsections)
+            
+            for i, subsection in enumerate(self.subsections, 1):
+                # If any subsection is numbered, number all siblings unless explicitly false
+                if any_subsection_numbered and subsection.numbered is not False:
+                    new_section_number = section_number + [i]
+                else:
+                    new_section_number = section_number
+                
+                xml.append(subsection.render_xml(indent + 2, new_section_number))
             xml.append(f'{indent_str}  </subsections>')
         
         # Closing tag
@@ -163,8 +232,25 @@ class PromptObjectModel:
                 raise ValueError("'subsections' must be a list if provided.")
             if 'bullets' in d and not isinstance(d['bullets'], list):
                 raise ValueError("'bullets' must be a list if provided.")
+            if 'numbered' in d and not isinstance(d['numbered'], bool):
+                raise ValueError("'numbered' must be a boolean if provided.")
+            if 'numberedBullets' in d and not isinstance(d['numberedBullets'], bool):
+                raise ValueError("'numberedBullets' must be a boolean if provided.")
 
-            section = Section(title=d.get('title'), body=d.get('body', ''), bullets=d.get('bullets', []))
+            # Only pass numbered/numberedBullets if they're explicitly in the dict
+            kwargs = {
+                'title': d.get('title'),
+                'body': d.get('body', ''),
+                'bullets': d.get('bullets', [])
+            }
+            
+            if 'numbered' in d:
+                kwargs['numbered'] = d['numbered']
+            if 'numberedBullets' in d:
+                kwargs['numberedBullets'] = d['numberedBullets']
+                
+            section = Section(**kwargs)
+            
             for sub in d.get('subsections', []):
                 section.subsections.append(build_section(sub))
             return section
@@ -174,10 +260,12 @@ class PromptObjectModel:
             pom.sections.append(build_section(sec))
         return pom
 
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         self.sections: List[Section] = []
+        self.debug = debug
 
-    def add_section(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None) -> Section:
+    def add_section(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None,
+                   numbered: Optional[bool] = None, numberedBullets: bool = False) -> Section:
         """
         Add a top-level section to the model.
         
@@ -185,11 +273,14 @@ class PromptObjectModel:
             title: The title of the section
             body: Optional body text for the section
             bullets: Optional list of bullet points
+            numbered: Whether this section should be numbered
+            numberedBullets: Whether bullets should be numbered
             
         Returns:
             The newly created Section object
         """
-        section = Section(title, body=body, bullets=bullets)
+        section = Section(title, body=body, bullets=bullets, 
+                         numbered=numbered, numberedBullets=numberedBullets)
         self.sections.append(section)
         return section
 
@@ -231,7 +322,31 @@ class PromptObjectModel:
         Returns:
             A string containing the markdown representation
         """
-        return "\n".join([section.render_markdown() for section in self.sections])
+        # Check if any top-level section has numbered=True
+        any_section_numbered = any(section.numbered for section in self.sections)
+        
+        # Debug output if enabled
+        if self.debug:
+            print(f"Any section numbered: {any_section_numbered}")
+            for i, section in enumerate(self.sections):
+                print(f"Section {i+1}: {section.title}, numbered={section.numbered}")
+        
+        md = []
+        for i, section in enumerate(self.sections, 1):
+            # If any section is numbered, number ALL siblings unless explicitly false
+            if any_section_numbered and section.numbered != False:
+                section_number = [i]
+            else:
+                section_number = []
+            
+            # Debug output if enabled
+            if self.debug:
+                print(f"Rendering section {i}: {section.title} with section_number={section_number}")
+            
+            section_md = section.render_markdown(section_number=section_number)
+            md.append(section_md)
+        
+        return "\n".join(md)
 
     def render_xml(self) -> str:
         """
@@ -241,7 +356,18 @@ class PromptObjectModel:
             A string containing the XML representation
         """
         xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<prompt>']
-        for section in self.sections:
-            xml.append(section.render_xml(indent=1))
+        
+        # Check if any top-level section has numbered=True
+        any_section_numbered = any(section.numbered for section in self.sections)
+        
+        for i, section in enumerate(self.sections, 1):
+            # If any section is numbered, number all siblings unless explicitly false
+            if any_section_numbered and section.numbered is not False:
+                section_number = [i]
+            else:
+                section_number = []
+                
+            xml.append(section.render_xml(indent=1, section_number=section_number))
+        
         xml.append('</prompt>')
         return "\n".join(xml) 
