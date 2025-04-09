@@ -89,7 +89,7 @@ class Section:
         if self.title is not None:
             prefix = ""
             if section_number:  # If we have a section number, use it
-                prefix = f"{'.'.join(map(str, section_number))} "
+                prefix = f"{'.'.join(map(str, section_number))}. "
             md.append(f"{'#' * level} {prefix}{self.title}\n")
         
         # Add body text
@@ -111,8 +111,9 @@ class Section:
         
         # Process subsections with proper numbering
         for i, subsection in enumerate(self.subsections, 1):
-            # Only increment section number if parent has a title
-            if self.title is not None:
+            # Only increment section number if this section has a title
+            # or if we're not at the root level (section_number is not empty)
+            if self.title is not None or section_number:
                 # If any subsection is numbered, number all siblings unless explicitly false
                 if any_subsection_numbered and subsection.numbered is not False:
                     new_section_number = section_number + [i]
@@ -120,6 +121,7 @@ class Section:
                     new_section_number = section_number
                 next_level = level + 1
             else:
+                # We're at a root section with no title, don't increment numbering
                 new_section_number = section_number
                 next_level = level
                 
@@ -151,8 +153,8 @@ class Section:
         # Title if present, with optional numbering
         if self.title is not None:
             prefix = ""
-            if self.numbered and section_number:
-                prefix = f"{'.'.join(map(str, section_number))} "
+            if section_number:  # If we have a section number, use it (regardless of self.numbered)
+                prefix = f"{'.'.join(map(str, section_number))}. "
             xml.append(f'{indent_str}  <title>{prefix}{self.title}</title>')
         
         # Body content if present
@@ -176,10 +178,16 @@ class Section:
             any_subsection_numbered = any(sub.numbered for sub in self.subsections)
             
             for i, subsection in enumerate(self.subsections, 1):
-                # If any subsection is numbered, number all siblings unless explicitly false
-                if any_subsection_numbered and subsection.numbered is not False:
-                    new_section_number = section_number + [i]
+                # Only increment section number if this section has a title
+                # or if we're not at the root level (section_number is not empty)
+                if self.title is not None or section_number:
+                    # If any subsection is numbered, number all siblings unless explicitly false
+                    if any_subsection_numbered and subsection.numbered is not False:
+                        new_section_number = section_number + [i]
+                    else:
+                        new_section_number = section_number
                 else:
+                    # We're at a root section with no title, don't increment numbering
                     new_section_number = section_number
                 
                 xml.append(subsection.render_xml(indent + 2, new_section_number))
@@ -332,11 +340,18 @@ class PromptObjectModel:
                 print(f"Section {i+1}: {section.title}, numbered={section.numbered}")
         
         md = []
-        for i, section in enumerate(self.sections, 1):
-            # If any section is numbered, number ALL siblings unless explicitly false
-            if any_section_numbered and section.numbered != False:
-                section_number = [i]
+        section_counter = 0
+        for i, section in enumerate(self.sections):
+            # Only increment the section counter for sections with titles
+            if section.title is not None:
+                section_counter += 1
+                # If any section is numbered, number ALL siblings unless explicitly false
+                if any_section_numbered and section.numbered != False:
+                    section_number = [section_counter]
+                else:
+                    section_number = []
             else:
+                # For sections without titles, don't use numbering at this level
                 section_number = []
             
             # Debug output if enabled
@@ -360,11 +375,18 @@ class PromptObjectModel:
         # Check if any top-level section has numbered=True
         any_section_numbered = any(section.numbered for section in self.sections)
         
+        section_counter = 0
         for i, section in enumerate(self.sections, 1):
-            # If any section is numbered, number all siblings unless explicitly false
-            if any_section_numbered and section.numbered is not False:
-                section_number = [i]
+            # Only increment the section counter for sections with titles
+            if section.title is not None:
+                section_counter += 1
+                # If any section is numbered, number all siblings unless explicitly false
+                if any_section_numbered and section.numbered is not False:
+                    section_number = [section_counter]
+                else:
+                    section_number = []
             else:
+                # For sections without titles, don't use numbering at this level
                 section_number = []
                 
             xml.append(section.render_xml(indent=1, section_number=section_number))
