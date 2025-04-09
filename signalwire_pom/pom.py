@@ -49,15 +49,15 @@ class Section:
             The newly created Section object
             
         Raises:
-            ValueError: If the title is None or if both title and body are empty
+            ValueError: If the title is None or if the body is empty
         """
         # Validate that subsections must have a title
         if title is None:
             raise ValueError("Subsections must have a title")
             
-        # Validate that a section must have either a title or a body
-        if not title and not body:
-            raise ValueError("A section must have either a title or a body")
+        # Validate that all sections must have a body
+        if not body:
+            raise ValueError("All sections must have a non-empty body")
             
         subsection = Section(title, body=body, bullets=bullets, 
                             numbered=numbered, numberedBullets=numberedBullets)
@@ -242,7 +242,7 @@ class PromptObjectModel:
         else:
             data = json_data
 
-        def build_section(d: dict) -> Section:
+        def build_section(d: dict, is_subsection: bool = False) -> Section:
             if not isinstance(d, dict):
                 raise ValueError("Each section must be a dictionary.")
             if 'title' in d and not isinstance(d['title'], str):
@@ -256,9 +256,13 @@ class PromptObjectModel:
             if 'numberedBullets' in d and not isinstance(d['numberedBullets'], bool):
                 raise ValueError("'numberedBullets' must be a boolean if provided.")
                 
-            # Validate that a section must have either a title or a body
-            if 'title' not in d and ('body' not in d or not d.get('body')):
-                raise ValueError("A section must have either a title or a body")
+            # Validate that all sections must have a body
+            if 'body' not in d or not d.get('body'):
+                raise ValueError("All sections must have a non-empty body")
+                
+            # Validate that all subsections must have a title
+            if is_subsection and 'title' not in d:
+                raise ValueError("All subsections must have a title")
 
             # Only pass numbered/numberedBullets if they're explicitly in the dict
             kwargs = {
@@ -274,11 +278,9 @@ class PromptObjectModel:
                 
             section = Section(**kwargs)
             
-            # Validate that subsections must have a title
+            # Process subsections
             for i, sub in enumerate(d.get('subsections', [])):
-                if 'title' not in sub:
-                    raise ValueError(f"Subsection {i} must have a title")
-                section.subsections.append(build_section(sub))
+                section.subsections.append(build_section(sub, is_subsection=True))
                 
             return section
 
@@ -313,15 +315,15 @@ class PromptObjectModel:
             
         Raises:
             ValueError: If a section without a title is added after the first section,
-                       or if a section has neither a title nor a body
+                       or if a section has no body
         """
         # Validate that only the first section can have no title
         if title is None and len(self.sections) > 0:
             raise ValueError("Only the first section can have no title")
         
-        # Validate that a section must have either a title or a body
-        if title is None and not body:
-            raise ValueError("A section must have either a title or a body")
+        # Validate that all sections must have a body
+        if not body:
+            raise ValueError("All sections must have a non-empty body")
             
         section = Section(title, body=body, bullets=bullets, 
                          numbered=numbered, numberedBullets=numberedBullets)
