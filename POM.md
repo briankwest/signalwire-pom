@@ -102,22 +102,22 @@ Each section is rendered as Markdown with heading levels corresponding to its de
 ### **Rendered Markdown**
 
 ```
-## 1 Objective
+## 1. Objective
 
 Define the task.
 
 1. Be concise
 2. Avoid repetition
 
-### 1 Main Goal
+### 1. Main Goal
 
 Provide helpful and direct responses.
 
-### 2 Edge Cases
+### 2. Edge Cases
 
 Clarify how to handle rare or ambiguous requests.
 
-## 2 At Start
+## 2. At Start
 
 Greet the user and explain your role.
 ```
@@ -159,7 +159,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
 ```
 <prompt>
   <section>
-    <title>1 Objective</title>
+    <title>1. Objective</title>
     <body>Define the task.</body>
     <bullets>
       <bullet id="1">Be concise</bullet>
@@ -167,7 +167,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
     </bullets>
     <subsections>
       <section>
-        <title>1 Main Goal</title>
+        <title>1. Main Goal</title>
         <body>Provide helpful and direct responses.</body>
       </section>
       <section>
@@ -177,7 +177,7 @@ Each section becomes a `<section>` element, with optional `<title>`, `<body>`, `
     </subsections>
   </section>
   <section>
-    <title>2 At Start</title>
+    <title>2. At Start</title>
     <body>Greet the user and explain your role.</body>
   </section>
 </prompt>
