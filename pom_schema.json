@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/pom.schema.json",
+  "title": "Prompt Object Model",
+  "type": "array",
+  "prefixItems": [
+    { "$ref": "#/$defs/topLevelSectionFirst" }
+  ],
+  "items": { "$ref": "#/$defs/topLevelSectionRest" },
+  "$defs": {
+    "sectionContent": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "bullets": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "subsections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nestedSection" }
+        },
+        "numbered": { "type": "boolean" },
+        "numberedBullets": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "topLevelSectionFirst": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
+      ]
+    },
+    "topLevelSectionRest": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" },
+        { "required": ["title"] }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
+      ]
+    },
+    "nestedSection": {
+      "allOf": [
+        { "$ref": "#/$defs/sectionContent" },
+        { "required": ["title"] }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
+      ]
+    }
+  }
+}

@@ -73,25 +73,44 @@ The entire POM document is a JSON array of top-level section objects.
     },
     "topLevelSectionFirst": {
       "allOf": [
-        { "$ref": "#/$defs/sectionContent" },
-        { "required": ["body"] }
+        { "$ref": "#/$defs/sectionContent" }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
       ]
     },
     "topLevelSectionRest": {
       "allOf": [
         { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title", "body"] }
+        { "required": ["title"] }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
       ]
     },
     "nestedSection": {
       "allOf": [
         { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title", "body"] }
+        { "required": ["title"] }
+      ],
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
       ]
     }
   }
 }
 ```
+
+The schema above defines these validation rules:
+
+1. A POM document is a JSON array of section objects
+2. The first top-level section must have either a body or bullets, but title is optional
+3. Subsequent top-level sections must have a title and either a body or bullets
+4. All nested sections (subsections) must have a title and either a body or bullets
+5. Each section can include optional formatting properties (numbered, numberedBullets)
 
 ---
 
