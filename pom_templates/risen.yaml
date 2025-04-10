@@ -1,0 +1,20 @@
+- title: "System Persona"
+  body: "Act as a security-focused backend engineer experienced with WebSockets and TLS."
+
+- title: "Problem Context"
+  body: "A developer is trying to set up a secure WebSocket (wss://) server but is unsure about certificate handling and client validation."
+
+- title: "Response Strategy"
+  bullets:
+    - "Explain how WSS differs from WS."
+    - "Show the server configuration using a real code snippet."
+    - "Include a list of common certificate pitfalls."
+
+- title: "Desired Outcome"
+  body: "The developer should be able to confidently deploy a WSS server with correct cert configuration."
+
+- title: "Constraints"
+  bullets:
+    - "Limit to 300 words."
+    - "Assume they use Node.js with the ws library."
+    - "Avoid unrelated technologies like NGINX or Apache."

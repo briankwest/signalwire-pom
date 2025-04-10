@@ -1,5 +1,6 @@
 from typing import List, Optional, Union
 import json
+import yaml
 
 class Section:
     """
@@ -49,17 +50,18 @@ class Section:
             The newly created Section object
             
         Raises:
-            ValueError: If the title is None or if the body is empty
+            ValueError: If the title is None or if the section has neither a body nor bullets
         """
         # Validate that subsections must have a title
         if title is None:
             raise ValueError("Subsections must have a title")
             
-        # Validate that all sections must have a body
-        if not body:
-            raise ValueError("All sections must have a non-empty body")
+        # Validate that all sections must have either a body or bullets
+        bullets_list = bullets or []
+        if not body and not bullets_list:
+            raise ValueError("All sections must have either a non-empty body or non-empty bullets")
             
-        subsection = Section(title, body=body, bullets=bullets, 
+        subsection = Section(title, body=body, bullets=bullets_list, 
                             numbered=numbered, numberedBullets=numberedBullets)
         self.subsections.append(subsection)
         return subsection
@@ -219,8 +221,8 @@ class PromptObjectModel:
     document composed of nested sections, each of which can include a title,
     body text, bullet points, and arbitrarily nested subsections.
     
-    This class supports both machine-readability (via JSON) and structured 
-    rendering (via Markdown), making it ideal for prompt templating, modular
+    This class supports both machine-readability (via JSON/YAML) and structured 
+    rendering (via Markdown/XML), making it ideal for prompt templating, modular
     editing, and traceable documentation.
     """
     @staticmethod
@@ -241,7 +243,45 @@ class PromptObjectModel:
             data = json.loads(json_data)
         else:
             data = json_data
-
+        
+        return PromptObjectModel._from_dict(data)
+    
+    @staticmethod
+    def from_yaml(yaml_data: Union[str, dict]) -> 'PromptObjectModel':
+        """
+        Create a PromptObjectModel instance from YAML data.
+        
+        Args:
+            yaml_data: Either a YAML string or a parsed dictionary
+            
+        Returns:
+            A new PromptObjectModel populated with the data from the YAML
+            
+        Raises:
+            ValueError: If the YAML is not properly formatted
+        """
+        if isinstance(yaml_data, str):
+            data = yaml.safe_load(yaml_data)
+        else:
+            data = yaml_data
+        
+        return PromptObjectModel._from_dict(data)
+    
+    @staticmethod
+    def _from_dict(data: dict) -> 'PromptObjectModel':
+        """
+        Internal method to create a PromptObjectModel from a dictionary.
+        Used by both from_json and from_yaml.
+        
+        Args:
+            data: A dictionary containing the POM structure
+            
+        Returns:
+            A new PromptObjectModel populated with the data
+            
+        Raises:
+            ValueError: If the data is not properly formatted
+        """
         def build_section(d: dict, is_subsection: bool = False) -> Section:
             if not isinstance(d, dict):
                 raise ValueError("Each section must be a dictionary.")
@@ -256,9 +296,11 @@ class PromptObjectModel:
             if 'numberedBullets' in d and not isinstance(d['numberedBullets'], bool):
                 raise ValueError("'numberedBullets' must be a boolean if provided.")
                 
-            # Validate that all sections must have a body
-            if 'body' not in d or not d.get('body'):
-                raise ValueError("All sections must have a non-empty body")
+            # Validate that all sections must have either a body or bullets
+            has_body = 'body' in d and d.get('body')
+            has_bullets = 'bullets' in d and d.get('bullets')
+            if not has_body and not has_bullets:
+                raise ValueError("All sections must have either a non-empty body or non-empty bullets")
                 
             # Validate that all subsections must have a title
             if is_subsection and 'title' not in d:
@@ -315,17 +357,18 @@ class PromptObjectModel:
             
         Raises:
             ValueError: If a section without a title is added after the first section,
-                       or if a section has no body
+                       or if a section has neither a body nor bullets
         """
         # Validate that only the first section can have no title
         if title is None and len(self.sections) > 0:
             raise ValueError("Only the first section can have no title")
         
-        # Validate that all sections must have a body
-        if not body:
-            raise ValueError("All sections must have a non-empty body")
+        # Validate that all sections must have either a body or bullets
+        bullets_list = bullets or []
+        if not body and not bullets_list:
+            raise ValueError("All sections must have either a non-empty body or non-empty bullets")
             
-        section = Section(title, body=body, bullets=bullets, 
+        section = Section(title, body=body, bullets=bullets_list, 
                          numbered=numbered, numberedBullets=numberedBullets)
         self.sections.append(section)
         return section
@@ -360,6 +403,26 @@ class PromptObjectModel:
             A JSON string representation of the model
         """
         return json.dumps([s.to_dict() for s in self.sections], indent=2)
+    
+    def to_yaml(self) -> str:
+        """
+        Convert the entire model to a YAML string.
+        
+        Returns:
+            A YAML string representation of the model
+        """
+        return yaml.dump([s.to_dict() for s in self.sections], 
+                         default_flow_style=False, 
+                         sort_keys=False)
+    
+    def to_dict(self) -> List[dict]:
+        """
+        Convert the entire model to a list of dictionaries.
+        
+        Returns:
+            A list of dictionaries representing the model
+        """
+        return [s.to_dict() for s in self.sections]
 
     def render_markdown(self) -> str:
         """
