@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="signalwire-pom",
-    version="0.1.7",
+    version="0.1.8",
     author="SignalWire",
     author_email="support@signalwire.com",
     description="Prompt Object Model - A structured data format for organizing and rendering LLM prompts",
@@ -19,4 +19,13 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    install_requires=[
+        "docopt",
+        "pyyaml",
+    ],
+    entry_points={
+        "console_scripts": [
+            "pom_tool=examples.pom_tool:main",
+        ],
+    },
 ) 
