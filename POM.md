@@ -42,18 +42,15 @@ The entire POM document is a JSON array of top-level section objects.
 
 ## **JSON Schema**
 
-```
+```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/pom.schema.json",
   "title": "Prompt Object Model",
   "type": "array",
-  "prefixItems": [
-    { "$ref": "#/$defs/topLevelSectionFirst" }
-  ],
-  "items": { "$ref": "#/$defs/topLevelSectionRest" },
+  "items": { "$ref": "#/$defs/section" },
   "$defs": {
-    "sectionContent": {
+    "section": {
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -64,41 +61,16 @@ The entire POM document is a JSON array of top-level section objects.
         },
         "subsections": {
           "type": "array",
-          "items": { "$ref": "#/$defs/nestedSection" }
+          "items": { "$ref": "#/$defs/section" }
         },
         "numbered": { "type": "boolean" },
         "numberedBullets": { "type": "boolean" }
       },
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
+      ],
       "additionalProperties": false
-    },
-    "topLevelSectionFirst": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
-    },
-    "topLevelSectionRest": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title"] }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
-    },
-    "nestedSection": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title"] }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
     }
   }
 }
@@ -106,11 +78,11 @@ The entire POM document is a JSON array of top-level section objects.
 
 The schema above defines these validation rules:
 
-1. A POM document is a JSON array of section objects
-2. The first top-level section must have either a body or bullets, but title is optional
-3. Subsequent top-level sections must have a title and either a body or bullets
-4. All nested sections (subsections) must have a title and either a body or bullets
-5. Each section can include optional formatting properties (numbered, numberedBullets)
+1. A POM document is a JSON array of section objects.
+2. Each section must have either a body or bullets.
+3. Sections can include optional formatting properties (`numbered`, `numberedBullets`).
+4. Nested sections (subsections) are allowed and follow the same structure as top-level sections.
+5. If a title is missing in sections other than the first, it defaults to "Untitled Section".
 
 ---
 
