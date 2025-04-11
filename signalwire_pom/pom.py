@@ -493,4 +493,27 @@ class PromptObjectModel:
             xml.append(section.render_xml(indent=1, section_number=section_number))
         
         xml.append('</prompt>')
-        return "\n".join(xml) 
+        return "\n".join(xml)
+
+    def add_pom_as_subsection(self, target: Union[str, Section], pom_to_add: 'PromptObjectModel'):
+        """
+        Add another PromptObjectModel as a subsection to a section with the given title or section object.
+        
+        Args:
+            target: The title of the section or the Section object to which the POM should be added as a subsection.
+            pom_to_add: The PromptObjectModel to add as a subsection.
+        
+        Raises:
+            ValueError: If no section with the target title is found (when target is a string).
+        """
+        if isinstance(target, str):
+            target_section = self.find_section(target)
+            if not target_section:
+                raise ValueError(f"No section with title '{target}' found.")
+        elif isinstance(target, Section):
+            target_section = target
+        else:
+            raise TypeError("Target must be a string or a Section object.")
+        
+        for section in pom_to_add.sections:
+            target_section.subsections.append(section) 

@@ -3,13 +3,14 @@
 POM Tool - Command line utility for working with Prompt Object Model files
 
 Usage:
-    pom_tool.py <input_file> [--output=<format>] [--outfile=<file>]
+    pom_tool.py <input_file> [--output=<format>] [--outfile=<file>] [--merge_pom="<section name>:<filename>"]
     pom_tool.py (-h | --help)
 
 Options:
     -h --help           Show this help message
     --output=<format>   Output format: md, xml, json, yaml [default: md]
     --outfile=<file>    Output file (if not specified, prints to stdout)
+    --merge_pom=<arg>   Merge another POM into a section: "<section name>:<filename>"
 """
 
 import os
@@ -83,6 +84,7 @@ def main():
     input_file = args['<input_file>']
     output_format = args['--output'] or 'md'
     output_file = args['--outfile']
+    merge_pom = args['--merge_pom']
     
     # Validate output format
     if output_format not in ['md', 'xml', 'json', 'yaml']:
@@ -92,6 +94,12 @@ def main():
     try:
         # Load the POM
         pom = load_pom(input_file)
+        
+        # Handle merging another POM
+        if merge_pom:
+            section_name, filename = merge_pom.split(':', 1)
+            pom_to_merge = load_pom(filename)
+            pom.add_pom_as_subsection(section_name.strip(), pom_to_merge)
         
         # Render in the requested format
         output = render_pom(pom, output_format)
