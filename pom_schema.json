@@ -3,12 +3,9 @@
   "$id": "https://example.com/pom.schema.json",
   "title": "Prompt Object Model",
   "type": "array",
-  "prefixItems": [
-    { "$ref": "#/$defs/topLevelSectionFirst" }
-  ],
-  "items": { "$ref": "#/$defs/topLevelSectionRest" },
+  "items": { "$ref": "#/$defs/section" },
   "$defs": {
-    "sectionContent": {
+    "section": {
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -19,41 +16,16 @@
         },
         "subsections": {
           "type": "array",
-          "items": { "$ref": "#/$defs/nestedSection" }
+          "items": { "$ref": "#/$defs/section" }
         },
         "numbered": { "type": "boolean" },
         "numberedBullets": { "type": "boolean" }
       },
+      "anyOf": [
+        { "required": ["body"] },
+        { "required": ["bullets"] }
+      ],
       "additionalProperties": false
-    },
-    "topLevelSectionFirst": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
-    },
-    "topLevelSectionRest": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title"] }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
-    },
-    "nestedSection": {
-      "allOf": [
-        { "$ref": "#/$defs/sectionContent" },
-        { "required": ["title"] }
-      ],
-      "anyOf": [
-        { "required": ["body"] },
-        { "required": ["bullets"] }
-      ]
     }
   }
 }

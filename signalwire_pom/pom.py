@@ -331,7 +331,7 @@ class PromptObjectModel:
         # Validate that only the first section can have no title
         for i, sec in enumerate(data):
             if i > 0 and 'title' not in sec:
-                raise ValueError(f"Only the first section can have no title (section {i+1} has no title)")
+                sec['title'] = "Untitled Section"
             pom.sections.append(build_section(sec))
             
         return pom
