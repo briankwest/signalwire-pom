@@ -340,7 +340,7 @@ class PromptObjectModel:
         self.sections: List[Section] = []
         self.debug = debug
 
-    def add_section(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None,
+    def add_section(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[Union[List[str], str]] = None,
                    numbered: Optional[bool] = None, numberedBullets: bool = False) -> Section:
         """
         Add a top-level section to the model.
@@ -348,7 +348,7 @@ class PromptObjectModel:
         Args:
             title: The title of the section
             body: Optional body text for the section
-            bullets: Optional list of bullet points
+            bullets: Optional list of bullet points or a single string
             numbered: Whether this section should be numbered
             numberedBullets: Whether bullets should be numbered
             
@@ -363,8 +363,13 @@ class PromptObjectModel:
         if title is None and len(self.sections) > 0:
             raise ValueError("Only the first section can have no title")
         
+        # Convert bullets to a list if it's a string
+        if isinstance(bullets, str):
+            bullets_list = [bullets]
+        else:
+            bullets_list = bullets or []
+        
         # Validate that all sections must have either a body or bullets
-        bullets_list = bullets or []
         if not body and not bullets_list:
             raise ValueError("All sections must have either a non-empty body or non-empty bullets")
             
