@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 POM Tool - Command line utility for working with Prompt Object Model files
 
@@ -31,7 +31,7 @@ def detect_file_format(file_path):
         return 'yaml'
     
     # If extension doesn't clearly indicate, try to parse the content
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read().strip()
         
     # Simple heuristic: JSON typically starts with { or [
@@ -56,7 +56,7 @@ def load_pom(file_path):
     """Load a POM from a file, auto-detecting the format."""
     format_type = detect_file_format(file_path)
     
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
     
     if format_type == 'json':
@@ -106,7 +106,7 @@ def main():
         
         # Output to file or stdout
         if output_file:
-            with open(output_file, 'w') as file:
+            with open(output_file, 'w', encoding='utf-8') as file:
                 file.write(output)
             print(f"Output written to {output_file}")
         else:

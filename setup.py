@@ -1,11 +1,13 @@
 from setuptools import setup, find_packages
+import os
+import sys
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="signalwire-pom",
-    version="0.2.0",
+    version="0.2.1",
     author="SignalWire",
     author_email="support@signalwire.com",
     description="Prompt Object Model - A structured data format for organizing and rendering LLM prompts",
@@ -28,4 +30,6 @@ setup(
             "pom_tool=signalwire_pom.cli:main",
         ],
     },
+    include_package_data=True,
+    zip_safe=False,
 ) 
