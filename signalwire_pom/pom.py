@@ -56,12 +56,8 @@ class Section:
         if title is None:
             raise ValueError("Subsections must have a title")
             
-        # Validate that all sections must have either a body or bullets
-        bullets_list = bullets or []
-        if not body and not bullets_list:
-            raise ValueError("All sections must have either a non-empty body or non-empty bullets")
-            
-        subsection = Section(title, body=body, bullets=bullets_list, 
+        # Create the subsection (validation will happen when content is added)
+        subsection = Section(title, body=body, bullets=bullets or [], 
                             numbered=numbered, numberedBullets=numberedBullets)
         self.subsections.append(subsection)
         return subsection
@@ -296,11 +292,12 @@ class PromptObjectModel:
             if 'numberedBullets' in d and not isinstance(d['numberedBullets'], bool):
                 raise ValueError("'numberedBullets' must be a boolean if provided.")
                 
-            # Validate that all sections must have either a body or bullets
+            # Validate that all sections must have either a body, bullets, or subsections
             has_body = 'body' in d and d.get('body')
             has_bullets = 'bullets' in d and d.get('bullets')
-            if not has_body and not has_bullets:
-                raise ValueError("All sections must have either a non-empty body or non-empty bullets")
+            has_subsections = 'subsections' in d and d.get('subsections')
+            if not has_body and not has_bullets and not has_subsections:
+                raise ValueError("All sections must have either a non-empty body, non-empty bullets, or subsections")
                 
             # Validate that all subsections must have a title
             if is_subsection and 'title' not in d:
@@ -356,8 +353,7 @@ class PromptObjectModel:
             The newly created Section object
             
         Raises:
-            ValueError: If a section without a title is added after the first section,
-                       or if a section has neither a body nor bullets
+            ValueError: If a section without a title is added after the first section
         """
         # Validate that only the first section can have no title
         if title is None and len(self.sections) > 0:
@@ -369,10 +365,7 @@ class PromptObjectModel:
         else:
             bullets_list = bullets or []
         
-        # Validate that all sections must have either a body or bullets
-        if not body and not bullets_list:
-            raise ValueError("All sections must have either a non-empty body or non-empty bullets")
-            
+        # Create the section (validation will happen when content is added)
         section = Section(title, body=body, bullets=bullets_list, 
                          numbered=numbered, numberedBullets=numberedBullets)
         self.sections.append(section)

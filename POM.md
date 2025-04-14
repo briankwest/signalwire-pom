@@ -34,6 +34,8 @@ Each section is an object with the following fields:
 | `numbered` | boolean | No | If true, enables heading numbering for this and all subsequent sibling sections. |
 | `numberedBullets` | boolean | No | If true, bullet points in this section are numbered instead of using dashes. |
 
+**Note**: Each section must have at least one of: `body`, `bullets`, or `subsections`. A section containing only a title without any content or nested sections is invalid.
+
 ### **JSON Structure**
 
 The entire POM document is a JSON array of top-level section objects.
@@ -68,7 +70,8 @@ The entire POM document is a JSON array of top-level section objects.
       },
       "anyOf": [
         { "required": ["body"] },
-        { "required": ["bullets"] }
+        { "required": ["bullets"] },
+        { "required": ["subsections"] }
       ],
       "additionalProperties": false
     }
@@ -79,7 +82,7 @@ The entire POM document is a JSON array of top-level section objects.
 The schema above defines these validation rules:
 
 1. A POM document is a JSON array of section objects.
-2. Each section must have either a body or bullets.
+2. Each section must have at least one of: a body, bullets, or subsections.
 3. Sections can include optional formatting properties (`numbered`, `numberedBullets`).
 4. Nested sections (subsections) are allowed and follow the same structure as top-level sections.
 5. If a title is missing in sections other than the first, it defaults to "Untitled Section".
@@ -227,6 +230,35 @@ with open("prompt.json", "r") as f:
     print(pom.render_markdown())
 ```
 
+### **Creating Sections with Only Subsections**
+
+You can create sections that contain only subsections without body text or bullets:
+
+```py
+from POM import PromptObjectModel
+
+pom = PromptObjectModel()
+section = pom.add_section(title="Categories")
+section.add_subsection(title="Type A", body="First category description")
+section.add_subsection(title="Type B", body="Second category description")
+
+print(pom.render_markdown())
+```
+
+This will render as:
+
+```
+## Categories
+
+### Type A
+
+First category description
+
+### Type B
+
+Second category description
+```
+
 ---
 
 ## **Benefits of POM**
@@ -236,6 +268,7 @@ with open("prompt.json", "r") as f:
 * **Auditability**: Render Markdown for human or LLM review.  
 * **Portability**: Export to or import from JSON.  
 * **Safety**: Prevents accidental formatting loss or unstructured instructions.
+* **Flexibility**: Supports various content structures, including sections that only organize subsections.
 
 ---
 

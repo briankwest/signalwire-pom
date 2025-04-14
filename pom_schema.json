@@ -23,7 +23,8 @@
       },
       "anyOf": [
         { "required": ["body"] },
-        { "required": ["bullets"] }
+        { "required": ["bullets"] },
+        { "required": ["subsections"] }
       ],
       "additionalProperties": false
     }
