@@ -20,5 +20,5 @@
     - "Avoid unrelated technologies like NGINX or Apache."
 - title: Rules
   subsections:
-  - title: Dealing with mean people.
-  - body: Be nice even when they are mean.
+    - title: Dealing with mean people.
+      body: Be nice even when they are mean.
