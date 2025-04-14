@@ -61,6 +61,10 @@ Each prompt document consists of a top-level list of `Section` objects. Each `Se
 * `body` *(str, optional)* — A paragraph of text associated with the section.
 * `bullets` *(list of str, optional)* — Bullet-pointed items.
 * `subsections` *(list of Section objects)* — Nested sections with the same structure.
+* `numbered` *(bool, optional)* — Whether this section should be numbered.
+* `numberedBullets` *(bool, optional)* — Whether bullets should be numbered.
+
+**Note**: Each section must have at least one of: `body`, `bullets`, or `subsections`. A section containing only a title without any content or nested sections is invalid.
 
 ## Usage
 
@@ -77,6 +81,11 @@ overview.add_bullets(["Point 1", "Point 2", "Point 3"])
 # Add subsections
 details = overview.add_subsection("Details", body="More detailed information.")
 details.add_bullets(["Detail 1", "Detail 2"])
+
+# Creating sections with only subsections (no body or bullets required)
+categories = pom.add_section("Categories")
+categories.add_subsection("Type A", body="First category description")
+categories.add_subsection("Type B", body="Second category description") 
 
 # Generate markdown
 markdown = pom.render_markdown()
@@ -174,6 +183,7 @@ Provide helpful and concise answers tailored to user intent.
 - Export to markdown, JSON, or XML
 - Import from JSON
 - Find sections by title
+- Numbering support for sections and bullet points
 
 ## Intended Use Cases
 
