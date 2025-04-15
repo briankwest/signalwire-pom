@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "signalwire-pom"
-version = "0.2.1"
+version = "0.2.2"
 description = "Prompt Object Model - A structured data format for organizing and rendering LLM prompts"
 readme = "README.md"
 authors = [
@@ -23,8 +23,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/signalwire/signalwire-pom"
-Issues = "https://github.com/signalwire/signalwire-pom/issues"
+Homepage = "https://github.com/briankwest/signalwire-pom"
+Issues = "https://github.com/briankwest/signalwire-pom/issues"
 
 [project.scripts]
 pom_tool = "signalwire_pom.cli:main" 

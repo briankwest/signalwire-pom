@@ -7,13 +7,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="signalwire-pom",
-    version="0.2.1",
+    version="0.2.2",
     author="SignalWire",
     author_email="support@signalwire.com",
     description="Prompt Object Model - A structured data format for organizing and rendering LLM prompts",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/signalwire/signalwire-pom",
+    url="https://github.com/briankwest/signalwire-pom",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
