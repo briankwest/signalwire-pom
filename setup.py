@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="signalwire-pom",
-    version="0.2.3",
+    version="2.0",
     author="SignalWire",
     author_email="support@signalwire.com",
     description="Prompt Object Model - A structured data format for organizing and rendering LLM prompts",
