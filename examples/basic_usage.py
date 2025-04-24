@@ -1,4 +1,4 @@
-from signalwire_pom import PromptObjectModel
+from signalwire import PromptObjectModel
 
 # Create a new POM
 pom = PromptObjectModel()

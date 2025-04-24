@@ -18,7 +18,7 @@ import sys
 import json
 import yaml
 from docopt import docopt
-from signalwire_pom.pom import PromptObjectModel
+from signalwire.pom import PromptObjectModel
 
 def detect_file_format(file_path):
     """Detect if the file is JSON or YAML based on extension and content."""
