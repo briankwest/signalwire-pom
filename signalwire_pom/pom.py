@@ -66,9 +66,11 @@ class Section:
         """Convert the section to a dictionary representation."""
         data = {
             "body": self.body,
-            "bullets": self.bullets,
-            "subsections": [s.to_dict() for s in self.subsections]
+            "bullets": self.bullets
         }
+        if self.subsections:
+            data["subsections"] = [s.to_dict() for s in self.subsections]
+        
         if self.title is not None:
             data["title"] = self.title
         if self.numbered:
