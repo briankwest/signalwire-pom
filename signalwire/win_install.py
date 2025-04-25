@@ -19,7 +19,7 @@ def install_windows_bat():
     
     with open(bat_path, 'w') as f:
         f.write('@echo off\r\n')
-        f.write(f'"{python_path}" -m signalwire_pom.cli %*\r\n')
+        f.write(f'"{python_path}" -m signalwire.cli %*\r\n')
     
     print(f"Created Windows batch file at: {bat_path}")
     return True

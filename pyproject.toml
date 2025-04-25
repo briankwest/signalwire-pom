@@ -4,16 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "signalwire-pom"
-version = "2.1"
+version = "2.2"
 description = "Prompt Object Model - A structured data format for organizing and rendering LLM prompts"
 readme = "README.md"
 authors = [
     {name = "SignalWire", email = "support@signalwire.com"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 requires-python = ">=3.6"
@@ -27,4 +26,8 @@ Homepage = "https://github.com/briankwest/signalwire-pom"
 Issues = "https://github.com/briankwest/signalwire-pom/issues"
 
 [project.scripts]
-pom_tool = "signalwire_pom.cli:main" 
+pom_tool = "signalwire.cli:main"
+
+[tool.setuptools]
+packages = ["signalwire"]
+
