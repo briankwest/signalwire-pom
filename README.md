@@ -69,7 +69,7 @@ Each prompt document consists of a top-level list of `Section` objects. Each `Se
 ## Usage
 
 ```python
-from signalwire import PromptObjectModel
+from signalwire_pom import PromptObjectModel
 
 # Create a new POM
 pom = PromptObjectModel()
