@@ -66,7 +66,10 @@ class Section:
         """Convert the section to a dictionary representation."""
         data = {}
         
-        # Only include non-empty fields
+        # Add keys in specific order: title, body, bullets, subsections
+        if self.title is not None:
+            data["title"] = self.title
+            
         if self.body:
             data["body"] = self.body
             
@@ -76,8 +79,7 @@ class Section:
         if self.subsections:
             data["subsections"] = [s.to_dict() for s in self.subsections]
         
-        if self.title is not None:
-            data["title"] = self.title
+        # Add remaining attributes
         if self.numbered:
             data["numbered"] = self.numbered
         if self.numberedBullets:
