@@ -64,10 +64,15 @@ class Section:
 
     def to_dict(self):
         """Convert the section to a dictionary representation."""
-        data = {
-            "body": self.body,
-            "bullets": self.bullets
-        }
+        data = {}
+        
+        # Only include non-empty fields
+        if self.body:
+            data["body"] = self.body
+            
+        if self.bullets:
+            data["bullets"] = self.bullets
+            
         if self.subsections:
             data["subsections"] = [s.to_dict() for s in self.subsections]
         
