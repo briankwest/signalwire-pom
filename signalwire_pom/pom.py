@@ -20,18 +20,32 @@ class Section:
     def __init__(self, title: Optional[str] = None, *, body: str = '', bullets: Optional[List[str]] = None, 
                  numbered: Optional[bool] = None, numberedBullets: bool = False):
         self.title = title
+        
+        # Validate body is a string
+        if not isinstance(body, str):
+            raise TypeError(f"body must be a string, not {type(body).__name__}. "
+                          f"If you meant to pass a list of bullet points, use bullets parameter instead.")
         self.body = body
+        
+        # Validate bullets is a list if provided
+        if bullets is not None and not isinstance(bullets, list):
+            raise TypeError(f"bullets must be a list or None, not {type(bullets).__name__}")
         self.bullets = bullets or []
+        
         self.subsections: List['Section'] = []
         self.numbered = numbered
         self.numberedBullets = numberedBullets
 
     def add_body(self, body: str):
         """Add or replace the body text for this section."""
+        if not isinstance(body, str):
+            raise TypeError(f"body must be a string, not {type(body).__name__}")
         self.body = body
 
     def add_bullets(self, bullets: List[str]):
         """Add bullet points to this section."""
+        if not isinstance(bullets, list):
+            raise TypeError(f"bullets must be a list, not {type(bullets).__name__}")
         self.bullets.extend(bullets)
 
     def add_subsection(self, title: str, *, body: str = '', bullets: Optional[List[str]] = None,
